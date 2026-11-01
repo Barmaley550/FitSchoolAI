@@ -682,3 +682,4 @@ const translationObserver = new MutationObserver((mutations) => {
   }
 });
 translationObserver.observe(document.body, { childList: true, subtree: true });
+ 
