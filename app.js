@@ -138,7 +138,8 @@ try {
 }
 function setPageZoom(value, save = true) {
   const zoom = Math.min(100, Math.max(65, Math.round(Number(value) / 5) * 5));
-  document.documentElement.style.zoom = `${zoom}%`;
+  site.style.zoom = `${zoom}%`;
+  demo.style.zoom = `${zoom}%`;
   zoomSlider.value = String(zoom);
   zoomLevel.value = `${zoom}%`;
   zoomSlider.setAttribute("aria-valuetext", `${zoom} percent`);
