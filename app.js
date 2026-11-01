@@ -130,6 +130,7 @@ const zoomControl = document.getElementById("zoom-control");
 const zoomSlider = document.getElementById("zoom-slider");
 const zoomLevel = document.getElementById("zoom-level");
 const embeddedPage = window.self !== window.top;
+document.body.classList.toggle("embedded-page", embeddedPage);
 let savedZoom = null;
 try {
   savedZoom = Number(localStorage.getItem("fitschool-page-zoom"));
