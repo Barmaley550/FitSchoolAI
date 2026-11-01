@@ -181,7 +181,7 @@ h1,h2,h3,h4,p { margin-top: 0; }
 .language-option small { color: #939cad; font-size: 10px; }
 .language-arrow { margin-left: auto; color: #bca7ff; font-size: 18px; }
 .zoom-control { position: fixed; z-index: 46; bottom: 18px; left: 18px; color: #f5f6fb; font-size: 10px; }
-.zoom-control summary { min-width: 62px; min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; border: 1px solid #a78bfa55; border-radius: 11px; background: #171d2df5; box-shadow: 0 8px 26px #0008; color: #d6c9ff; font-weight: 700; cursor: pointer; list-style: none; backdrop-filter: blur(12px); }
+.zoom-control summary { min-width: 62px; min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; border: 1px solid #a78bfa55; border-radius: 11px; background: #171d2df5; box-shadow: 0 8px 26px #0008; color: #d6c9ff; font-weight: 700; cursor: pointer; list-style: none; backdrop-filter: blur(12px); user-select: none; -webkit-user-select: none; }
 .zoom-control summary::-webkit-details-marker { display: none; }
 .zoom-control summary > * { pointer-events: none; }
 .zoom-control summary span { font-size: 13px; }
