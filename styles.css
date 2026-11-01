@@ -157,7 +157,8 @@ h1,h2,h3,h4,p { margin-top: 0; }
   .demo-toolbar { height: 52px; padding-inline: 15px; }.back-to-site span,.switch-role span { display: none; }.demo-title { font-size: 9px; }.device-stage { padding: 0; }.device-label,.stage-note { display: none; }.device { width: 100%; height: calc(100dvh - 52px); min-height: 0; border: 0; border-radius: 0; box-shadow: none; padding-bottom: env(safe-area-inset-bottom, 8px); }.device-status { flex-basis: 34px; padding-top: 2px; }.device-hardware { display: none; }.device-home-indicator { margin-bottom: 4px; }
 }
 .language-control { display: inline-flex; align-items: center; }
-.language-switcher { min-height: 36px; max-width: 118px; padding: 0 25px 0 10px; border: 1px solid #394156; border-radius: 8px; background: #111827; color: #ececf4; font-size: 11px; cursor: pointer; }
+.language-switcher { width: 118px; min-width: 118px; min-height: 36px; padding: 0 22px 0 9px; border: 1px solid #394156; border-radius: 8px; background: #111827; color: #ececf4; font-size: 11px; font-weight: 600; cursor: pointer; }
+.language-switcher option { background: #111827; color: #f5f6fb; }
 .language-switcher:focus-visible { outline: 2px solid var(--purple-light); outline-offset: 3px; }
 .demo-toolbar .language-switcher { min-height: 32px; }
 .language-gate[hidden] { display: none; }
@@ -190,6 +191,8 @@ h1,h2,h3,h4,p { margin-top: 0; }
 body.radio-demo-active .zoom-control { top: 76px; bottom: auto; }
 body.radio-demo-active .zoom-panel { top: 44px; bottom: auto; }
 @media (max-width: 700px) {
+  .language-switcher { width: 92px; min-width: 92px; padding-inline: 6px 18px; font-size: 9px; }
+  .demo-language-control .language-switcher { width: 80px; min-width: 80px; }
   .zoom-control { bottom: 12px; left: 12px; }
   body.radio-demo-active .zoom-control { top: 58px; }
   body.radio-demo-active .zoom-panel { top: 40px; }
