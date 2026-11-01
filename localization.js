@@ -471,17 +471,7 @@ const translations = Object.fromEntries(
 const originalText = new WeakMap();
 const originalAttributes = new WeakMap();
 const languageGate = document.getElementById("language-gate");
-const languageSelects = [...document.querySelectorAll(".language-switcher")];
-const languageChoices = Object.entries(languageNames);
-
-function populateLanguageSelects() {
-  for (const select of languageSelects) {
-    for (const [code, name] of languageChoices) {
-      const option = select.querySelector(`option[value="${code}"]`);
-      if (option) option.textContent = `${code.toUpperCase()} · ${name}`;
-    }
-  }
-}
+const languageControls = [...document.querySelectorAll(".language-control")];
 
 function translateString(source, language) {
   const dictionary = translations[language];
@@ -620,7 +610,14 @@ function translateTree(root, language) {
 function setLanguage(language) {
   if (!Object.hasOwn(languageNames, language)) return;
   document.documentElement.lang = language;
-  for (const select of languageSelects) select.value = language;
+  for (const control of languageControls) {
+    const label = control.querySelector("[data-current-language]");
+    if (label) label.textContent = `${language.toUpperCase()} · ${languageNames[language]}`;
+    for (const option of control.querySelectorAll("[data-language-menu-option]")) {
+      const selected = option.dataset.languageMenuOption === language;
+      option.setAttribute("aria-selected", String(selected));
+    }
+  }
   const dictionary = translations[language];
   const title = "FitSchool AI — Move smarter. Live healthier.";
   document.title = language === "en" ? title : translateString(title, language);
@@ -642,16 +639,30 @@ function saveLanguage(language) {
 }
 
 function chooseLanguage(language) {
+  if (!Object.hasOwn(languageNames, language)) return;
   saveLanguage(language);
   setLanguage(language);
   languageGate.hidden = true;
   document.body.style.overflow = "";
+  closeLanguageMenus();
   for (const option of languageGate.querySelectorAll(".language-option")) {
     option.setAttribute("aria-pressed", String(option.dataset.language === language));
   }
 }
 
-populateLanguageSelects();
+function closeLanguageMenus(returnFocus = false) {
+  for (const control of languageControls) {
+    const trigger = control.querySelector(".language-switcher");
+    const menu = control.querySelector(".language-menu");
+    if (!trigger || !menu) continue;
+    trigger.setAttribute("aria-expanded", "false");
+    menu.hidden = true;
+    if (returnFocus && document.activeElement && control.contains(document.activeElement)) {
+      trigger.focus({ preventScroll: true });
+    }
+  }
+}
+
 let savedLanguage = null;
 try {
   savedLanguage = localStorage.getItem("fitschool-language");
@@ -664,12 +675,55 @@ document.body.style.overflow = "hidden";
 languageGate.querySelector(`.language-option[data-language="${savedLanguage || "en"}"]`)?.focus({ preventScroll: true });
 
 document.addEventListener("click", (event) => {
-  const option = event.target.closest("[data-language]");
-  if (option) chooseLanguage(option.dataset.language);
+  const target = event.target instanceof Element ? event.target : null;
+  const menuOption = target?.closest("[data-language-menu-option]");
+  const gateOption = target?.closest("#language-gate [data-language]");
+  if (menuOption) {
+    chooseLanguage(menuOption.dataset.languageMenuOption);
+    return;
+  }
+  if (gateOption) {
+    chooseLanguage(gateOption.dataset.language);
+    return;
+  }
+
+  const trigger = target?.closest(".language-switcher");
+  if (trigger) {
+    const control = trigger.closest(".language-control");
+    const menu = control.querySelector(".language-menu");
+    const isOpening = menu.hidden;
+    closeLanguageMenus();
+    menu.hidden = !isOpening;
+    trigger.setAttribute("aria-expanded", String(isOpening));
+    if (isOpening) {
+      menu.querySelector(`[data-language-menu-option="${document.documentElement.lang}"]`)?.focus({ preventScroll: true });
+    }
+    return;
+  }
+
+  closeLanguageMenus();
 });
-for (const select of languageSelects) {
-  select.addEventListener("change", () => chooseLanguage(select.value));
-}
+document.addEventListener("keydown", (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  const option = target?.closest("[data-language-menu-option]");
+  if (!option) {
+    if (event.key === "Escape") closeLanguageMenus();
+    return;
+  }
+  const options = [...option.closest(".language-menu").querySelectorAll("[data-language-menu-option]")];
+  const index = options.indexOf(option);
+  let nextIndex = index;
+  if (event.key === "ArrowDown") nextIndex = (index + 1) % options.length;
+  else if (event.key === "ArrowUp") nextIndex = (index - 1 + options.length) % options.length;
+  else if (event.key === "Home") nextIndex = 0;
+  else if (event.key === "End") nextIndex = options.length - 1;
+  else if (event.key === "Escape") {
+    closeLanguageMenus(true);
+    return;
+  } else return;
+  event.preventDefault();
+  options[nextIndex].focus();
+});
 
 const translationObserver = new MutationObserver((mutations) => {
   const language = document.documentElement.lang;
@@ -682,4 +736,3 @@ const translationObserver = new MutationObserver((mutations) => {
   }
 });
 translationObserver.observe(document.body, { childList: true, subtree: true });
- 
