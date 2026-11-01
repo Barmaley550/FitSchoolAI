@@ -126,6 +126,42 @@ const demo = document.getElementById("app-demo");
 const screen = document.getElementById("app-screen");
 const radioMiniPlayer = document.getElementById("radio-mini-player");
 const modalRoot = document.getElementById("modal-root");
+const zoomControl = document.getElementById("zoom-control");
+const zoomSlider = document.getElementById("zoom-slider");
+const zoomLevel = document.getElementById("zoom-level");
+const embeddedPage = window.self !== window.top;
+let savedZoom = null;
+try {
+  savedZoom = Number(localStorage.getItem("fitschool-page-zoom"));
+} catch (error) {
+  console.warn("The saved page zoom could not be read.", error);
+}
+function setPageZoom(value, save = true) {
+  const zoom = Math.min(100, Math.max(65, Math.round(Number(value) / 5) * 5));
+  document.documentElement.style.zoom = `${zoom}%`;
+  zoomSlider.value = String(zoom);
+  zoomLevel.value = `${zoom}%`;
+  zoomSlider.setAttribute("aria-valuetext", `${zoom} percent`);
+  if (!save) return;
+  try {
+    localStorage.setItem("fitschool-page-zoom", String(zoom));
+  } catch (error) {
+    console.warn("The page zoom preference could not be saved.", error);
+  }
+}
+const initialZoom = Number.isFinite(savedZoom) && savedZoom >= 65 && savedZoom <= 100
+  ? savedZoom
+  : embeddedPage ? 80 : 100;
+setPageZoom(initialZoom, false);
+zoomSlider.addEventListener("input", () => setPageZoom(zoomSlider.value));
+zoomControl.addEventListener("click", (event) => {
+  const stepButton = event.target.closest("[data-zoom-step]");
+  if (stepButton) {
+    setPageZoom(Number(zoomSlider.value) + Number(stepButton.dataset.zoomStep));
+  } else if (event.target.closest("[data-zoom-reset]")) {
+    setPageZoom(100);
+  }
+});
 const state = {
   screen: "welcome",
   role: null,
