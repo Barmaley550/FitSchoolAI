@@ -143,6 +143,9 @@ h1,h2,h3,h4,p { margin-top: 0; }
   .hero { gap: 12px; }.hero h1 { font-size: clamp(40px,6.3vw,58px); }.hero-art { transform: scale(.9); }
   .solution-inner { gap: 42px; }.privacy-inner { gap: 38px; }.trust-strip { gap: 25px; }
 }
+@media screen and (max-width: 1200px), screen and (max-height: 800px) {
+  body.embedded-page { zoom: 0.85 !important; }
+}
 @media (max-width: 700px) {
   html { scroll-padding-top: 70px; }.section-wrap { width: min(100% - 38px, 500px); }
   .site-header { height: 68px; padding-inline: 19px; }.header-actions { margin-left: auto; margin-right: 12px; }.header-actions .button { min-height: 35px; padding: 0 10px; font-size: 10px; }.header-actions .login-link { display: none; }.brand { font-size: 12px; }.brand-mark { width: 24px; height: 23px; }.menu-toggle { display: block; }
