@@ -183,6 +183,7 @@ h1,h2,h3,h4,p { margin-top: 0; }
 .zoom-control { position: fixed; z-index: 46; bottom: 18px; left: 18px; color: #f5f6fb; font-size: 10px; }
 .zoom-control summary { min-width: 62px; min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; border: 1px solid #a78bfa55; border-radius: 11px; background: #171d2df5; box-shadow: 0 8px 26px #0008; color: #d6c9ff; font-weight: 700; cursor: pointer; list-style: none; backdrop-filter: blur(12px); }
 .zoom-control summary::-webkit-details-marker { display: none; }
+.zoom-control summary > * { pointer-events: none; }
 .zoom-control summary span { font-size: 13px; }
 .zoom-panel { width: 194px; position: absolute; bottom: 44px; left: 0; padding: 12px; border: 1px solid #ffffff1a; border-radius: 12px; background: #151d2bf5; box-shadow: 0 12px 35px #0009; }
 .zoom-panel > label { display: block; margin-bottom: 8px; color: #a78bfa; font-size: 8px; font-weight: 700; letter-spacing: 1px; }
