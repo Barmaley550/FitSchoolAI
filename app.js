@@ -137,7 +137,7 @@ try {
   console.warn("The saved page zoom could not be read.", error);
 }
 function setPageZoom(value, save = true) {
-  const zoom = Math.min(100, Math.max(65, Math.round(Number(value) / 5) * 5));
+  const zoom = Math.min(100, Math.max(50, Math.round(Number(value) / 5) * 5));
   site.style.zoom = `${zoom}%`;
   demo.style.zoom = `${zoom}%`;
   zoomSlider.value = String(zoom);
@@ -150,7 +150,7 @@ function setPageZoom(value, save = true) {
     console.warn("The page zoom preference could not be saved.", error);
   }
 }
-const initialZoom = Number.isFinite(savedZoom) && savedZoom >= 65 && savedZoom <= 100
+const initialZoom = Number.isFinite(savedZoom) && savedZoom >= 50 && savedZoom <= 100
   ? savedZoom
   : embeddedPage ? 80 : 100;
 setPageZoom(initialZoom, false);
