@@ -22,7 +22,15 @@
           <a href="#home">Home</a><a href="#about">About</a><a href="#features">Features</a><a href="#technology">Technology</a><button class="mobile-nav-login" data-action="signin">Login</button>
         </nav>
         <div class="header-actions">
-          <label class="language-control"><span class="visually-hidden">Select language</span><select class="language-switcher" aria-label="Select language"><option value="en">EN · English</option><option value="lv">LV · Latviešu</option><option value="lt">LT · Lietuvių</option><option value="et">ET · Eesti</option></select></label>
+          <div class="language-control">
+            <button type="button" class="language-switcher" aria-label="Select language" aria-haspopup="listbox" aria-expanded="false"><span data-current-language>EN · English</span><span class="language-chevron" aria-hidden="true">⌄</span></button>
+            <div class="language-menu" role="listbox" aria-label="Select language" hidden>
+              <button type="button" role="option" class="language-menu-option" data-language-menu-option="en"><span class="language-menu-code">EN</span><span>English</span><span class="language-menu-check" aria-hidden="true">✓</span></button>
+              <button type="button" role="option" class="language-menu-option" data-language-menu-option="lv"><span class="language-menu-code">LV</span><span>Latviešu</span><span class="language-menu-check" aria-hidden="true">✓</span></button>
+              <button type="button" role="option" class="language-menu-option" data-language-menu-option="lt"><span class="language-menu-code">LT</span><span>Lietuvių</span><span class="language-menu-check" aria-hidden="true">✓</span></button>
+              <button type="button" role="option" class="language-menu-option" data-language-menu-option="et"><span class="language-menu-code">ET</span><span>Eesti</span><span class="language-menu-check" aria-hidden="true">✓</span></button>
+            </div>
+          </div>
           <button class="button button-outline button-small" data-action="open-app">Explore App <span>↗</span></button>
           <button class="login-link" data-action="signin">Login</button>
         </div>
@@ -114,7 +122,7 @@
     </div>
 
     <div id="app-demo" class="app-demo" hidden>
-      <div class="demo-toolbar"><button class="back-to-site" data-action="back-site">← <span>Back to website</span></button><div class="demo-title"><span class="brand-mark"><span></span><span></span><span></span></span> FITSCHOOL AI <small>APP PREVIEW</small></div><label class="language-control demo-language-control"><span class="visually-hidden">Select language</span><select class="language-switcher" aria-label="Select language"><option value="en">EN · English</option><option value="lv">LV · Latviešu</option><option value="lt">LT · Lietuvių</option><option value="et">ET · Eesti</option></select></label><button class="switch-role" data-action="switch-role">⇄ <span>Switch role</span></button></div>
+      <div class="demo-toolbar"><button class="back-to-site" data-action="back-site">← <span>Back to website</span></button><div class="demo-title"><span class="brand-mark"><span></span><span></span><span></span></span> FITSCHOOL AI <small>APP PREVIEW</small></div><div class="language-control demo-language-control"><button type="button" class="language-switcher" aria-label="Select language" aria-haspopup="listbox" aria-expanded="false"><span data-current-language>EN · English</span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-menu" role="listbox" aria-label="Select language" hidden><button type="button" role="option" class="language-menu-option" data-language-menu-option="en"><span class="language-menu-code">EN</span><span>English</span><span class="language-menu-check" aria-hidden="true">✓</span></button><button type="button" role="option" class="language-menu-option" data-language-menu-option="lv"><span class="language-menu-code">LV</span><span>Latviešu</span><span class="language-menu-check" aria-hidden="true">✓</span></button><button type="button" role="option" class="language-menu-option" data-language-menu-option="lt"><span class="language-menu-code">LT</span><span>Lietuvių</span><span class="language-menu-check" aria-hidden="true">✓</span></button><button type="button" role="option" class="language-menu-option" data-language-menu-option="et"><span class="language-menu-code">ET</span><span>Eesti</span><span class="language-menu-check" aria-hidden="true">✓</span></button></div></div><button class="switch-role" data-action="switch-role">⇄ <span>Switch role</span></button></div>
       <div class="device-stage"><div class="device-label">FITSCHOOL AI <span>—</span> APP PREVIEW <i></i></div><div class="device"><div class="device-hardware"><span class="device-camera"></span></div><div class="device-status"><span>9:41</span><span>●●● ▰</span></div><div id="app-screen" class="app-screen"></div><div class="device-home-indicator"></div></div><div class="stage-note">A closer look at a more personal kind of PE.</div></div>
     </div>
     <audio id="radio-audio" preload="none" aria-hidden="true"></audio>
@@ -149,4 +157,4 @@
     <script src="localization.js"></script>
     <script src="app.js"></script>
   </body>
-</html> 
+</html>
