@@ -221,9 +221,9 @@ function renderRadioMiniPlayer() {
   const isPlaying = state.radioStatus === "playing";
   const station = radioStations[state.radioStation];
   const labels = { connecting: "CONNECTING", error: "STREAM UNAVAILABLE", paused: "RADIO PAUSED", playing: "LIVE RADIO", ready: "" };
-  const stations = Object.entries(radioStations).map(([id, item]) => `<option value="${id}" ${id === state.radioStation ? "selected" : ""}>${item.name}</option>`).join("");
+  const stations = Object.entries(radioStations).map(([id, item]) => `<button type="button" class="radio-mini-station-option" role="option" data-radio-station-option="${id}" aria-selected="${id === state.radioStation}"><span>${item.name}</span><span class="radio-mini-station-check" aria-hidden="true">✓</span></button>`).join("");
   radioMiniPlayer.innerHTML = `<div class="radio-mini-meta"><i class="radio-mini-dot ${state.radioStatus}"></i><span><b>${station.name}</b><small aria-live="polite">${labels[state.radioStatus] || station.description}</small></span>${state.radioStatus === "error" ? `<a class="radio-mini-open" href="${station.website}" target="_blank" rel="noopener noreferrer" aria-label="Open ${station.name} website">↗</a>` : ""}</div>
-    <label class="radio-mini-station"><span class="visually-hidden">Choose radio station</span><select data-radio-station aria-label="Choose radio station">${stations}</select></label>
+    <div class="radio-mini-station"><button type="button" class="radio-mini-station-trigger" data-radio-menu-toggle aria-label="Choose radio station" aria-haspopup="listbox" aria-expanded="false"><span>${station.name}</span><span class="radio-mini-station-chevron" aria-hidden="true">⌄</span></button><div class="radio-mini-station-menu" role="listbox" aria-label="Choose radio station" hidden>${stations}</div></div>
     <button class="radio-mini-toggle" data-action="toggle-radio" aria-label="${isPlaying ? "Pause radio" : "Play radio"}" ${state.radioStatus === "connecting" ? "disabled" : ""}>${isPlaying ? "Ⅱ" : "▶"}</button>
     <label class="radio-mini-volume"><span class="visually-hidden">Radio volume</span><input type="range" min="0" max="1" step="0.01" value="${state.radioVolume}" aria-label="Radio volume" aria-valuetext="${Math.round(state.radioVolume * 100)} percent"><output>${Math.round(state.radioVolume * 100)}%</output></label>
     <button class="radio-mini-stop" data-action="stop-radio" aria-label="Stop radio">■</button>`;
@@ -488,7 +488,7 @@ function renderMusic() {
   return appView(`<div class="app-scroll">${header()}<span class="app-kicker">LIVE RADIO · BALTICS</span><h1 class="app-title">${stationTitle}</h1><p class="app-subtitle">Choose a station and listen while you explore.</p>
     <div class="radio-stations">${Object.entries(radioStations).map(([id, item]) => `<button class="radio-station app-card ${id === state.radioStation ? "selected" : ""}" data-station="${id}" aria-pressed="${id === state.radioStation}"><span class="radio-station-icon">♫</span><span><b>${item.name}</b><small>${item.description}</small></span><i>${id === state.radioStation ? "✓" : "›"}</i></button>`).join("")}</div>
     <div class="album-art"><div class="album-sun"></div><div class="album-mountains"></div><div class="album-label">${station.name.toUpperCase()} · LIVE</div></div>
-    <div class="track-info"><h3>${station.name}</h3><p>${station.description} · Latvia</p></div>
+    <div class="track-info"><h3>${station.name}</h3><p>${station.description}</p></div>
     <div class="radio-status ${state.radioStatus}" aria-live="polite"><i></i><span>${radioLabels[state.radioStatus]}</span></div>
     ${state.radioError ? `<p class="radio-error" role="alert">${state.radioError}</p>` : ""}
     <div class="player-controls"><button class="play-large" data-action="toggle-radio" aria-label="${isPlaying ? "Pause " + station.name + " radio" : "Play " + station.name + " radio"}" ${state.radioStatus === "connecting" ? "disabled" : ""}>${isPlaying ? "Ⅱ" : "▶"}</button></div>
@@ -601,6 +601,8 @@ function toast(message) {
 }
 
 document.addEventListener("click", (event) => {
+  const activeRadioMenu = radioMiniPlayer.querySelector(".radio-mini-station-menu:not([hidden])");
+  if (activeRadioMenu && !radioMiniPlayer.contains(event.target)) closeRadioStationMenu();
   const target = event.target.closest("button, a, [data-action], [data-feature], [data-tab], [data-role], [data-exercise], [data-day], [data-redeem], [data-teacher-tab]");
   if (!target) return;
   if (target.matches('a[href^="#"]')) {
@@ -617,6 +619,15 @@ document.addEventListener("click", (event) => {
     if (key === "teacher") state.teacherTab = "Overview";
     if (key === "wrapped") state.wrappedIndex = 0;
     render();
+    return;
+  }
+  if (target.hasAttribute("data-radio-menu-toggle")) {
+    toggleRadioStationMenu(target);
+    return;
+  }
+  if (target.dataset.radioStationOption) {
+    closeRadioStationMenu();
+    selectRadioStation(target.dataset.radioStationOption);
     return;
   }
   if (target.dataset.tab) { navigateTab(target.dataset.tab); return; }
@@ -692,8 +703,46 @@ document.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("change", (event) => {
-  if (event.target.matches("[data-radio-station]")) selectRadioStation(event.target.value);
+function closeRadioStationMenu(returnFocus = false) {
+  const trigger = radioMiniPlayer.querySelector("[data-radio-menu-toggle]");
+  const menu = radioMiniPlayer.querySelector(".radio-mini-station-menu");
+  if (!trigger || !menu) return;
+  menu.hidden = true;
+  trigger.setAttribute("aria-expanded", "false");
+  if (returnFocus) trigger.focus({ preventScroll: true });
+}
+
+function toggleRadioStationMenu(trigger) {
+  const menu = radioMiniPlayer.querySelector(".radio-mini-station-menu");
+  if (!menu) return;
+  const isOpening = menu.hidden;
+  closeRadioStationMenu();
+  menu.hidden = !isOpening;
+  trigger.setAttribute("aria-expanded", String(isOpening));
+  if (isOpening) {
+    menu.querySelector(`[data-radio-station-option="${state.radioStation}"]`)?.focus({ preventScroll: true });
+  }
+}
+
+document.addEventListener("keydown", (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  const option = target?.closest("[data-radio-station-option]");
+  const trigger = target?.closest("[data-radio-menu-toggle]");
+  if (event.key === "Escape" && (option || trigger)) {
+    closeRadioStationMenu(true);
+    return;
+  }
+  if (!option) return;
+  const options = [...radioMiniPlayer.querySelectorAll("[data-radio-station-option]")];
+  const index = options.indexOf(option);
+  let nextIndex = index;
+  if (event.key === "ArrowDown") nextIndex = (index + 1) % options.length;
+  else if (event.key === "ArrowUp") nextIndex = (index - 1 + options.length) % options.length;
+  else if (event.key === "Home") nextIndex = 0;
+  else if (event.key === "End") nextIndex = options.length - 1;
+  else return;
+  event.preventDefault();
+  options[nextIndex].focus();
 });
 
 document.addEventListener("input", (event) => {
