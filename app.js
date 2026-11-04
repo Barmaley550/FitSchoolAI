@@ -4,7 +4,7 @@ const artPalette = {
 };
 
 function illustration(type, options = {}) {
-  const { bad = false, compact = false } = options;
+  const { bad = false, compact = false, hideSkeleton = false } = options;
   const id = `grad-${type}-${Math.random().toString(36).slice(2, 7)}`;
   const defs = `<defs>
     <linearGradient id="${id}" x2="0" y2="1"><stop stop-color="#293750"/><stop offset="1" stop-color="#131a29"/></linearGradient>
@@ -83,7 +83,7 @@ function illustration(type, options = {}) {
       const pose = ["pushup", "plank", "jumping-jacks"].includes(type) ? type : "squat";
       const incorrect = bad || type === "form";
       contents += person(pose, incorrect);
-      contents += skeleton(pose, incorrect);
+      if (!hideSkeleton) contents += skeleton(pose, incorrect);
     }
   } else if (type === "food") {
     contents = `<path d="M0 0h400v260H0z" fill="url(#${id})"/><circle cx="195" cy="150" r="105" fill="#dce0dd"/><circle cx="195" cy="150" r="90" fill="#f3f0e9"/><ellipse cx="165" cy="135" rx="37" ry="28" fill="#a85d36"/><path d="M130 131q26-45 67-10l-6 28q-39 17-62-18" fill="#c87840"/><path d="M211 122q32-15 55 14t-6 37q-27 8-55-12z" fill="#c4a26a"/><circle cx="234" cy="143" r="8" fill="#8dab63"/><circle cx="253" cy="155" r="8" fill="#71a464"/><circle cx="214" cy="159" r="7" fill="#e18c65"/><path d="M186 183q30-10 55 11" stroke="#f3f0e9" stroke-width="8" stroke-linecap="round"/><circle cx="320" cy="72" r="33" fill="#d2dfd8" opacity=".2"/><path d="M317 53v39m-9-24h18" stroke="#e9eee9" stroke-opacity=".55" stroke-width="3"/>`;
@@ -164,6 +164,57 @@ zoomControl.addEventListener("click", (event) => {
     setPageZoom(100);
   }
 });
+let guidedTourStep = -1;
+const guidedTourSteps = [
+  {
+    screen: "signin",
+    role: null,
+    title: "A familiar sign-in screen",
+    copy: "This is a visual preview. The demo works without an account, and no credentials are saved or sent."
+  },
+  {
+    screen: "dashboard",
+    role: "student",
+    title: "Mark's personal dashboard",
+    copy: "Mark can see his progress and today's suggested workout at a glance. Let's open his AI Squats session."
+  },
+  {
+    screen: "pose",
+    role: "student",
+    title: "Movement analysis in action",
+    copy: "See the pose map overlaid on Mark's squat. The highlighted knees show a form issue. This is a sample visualization, not live camera analysis."
+  },
+  {
+    screen: "error",
+    role: "student",
+    title: "Feedback that helps you improve",
+    copy: "The app explains what to adjust and offers a practical cue: gently press your knees outward as you lower."
+  },
+  {
+    screen: "cafeteria",
+    role: "student",
+    title: "Lunch plans at a glance",
+    copy: "Browse the school menu by day, see what's served, and check sample nutrition estimates. The figures and menu are demo content."
+  },
+  {
+    screen: "music",
+    role: "student",
+    title: "Music from Baltic radio",
+    copy: "Choose an online station from Latvia, Lithuania, or Estonia. Playback is optional; the radio stays available while you explore other screens."
+  },
+  {
+    screen: "rewards",
+    role: "student",
+    title: "Small wins, visible progress",
+    copy: "Workouts and weekly streaks can earn FitPoints, which students can use for sample rewards. Offers shown here are for the demo."
+  },
+  {
+    screen: "teacher",
+    role: "teacher",
+    title: "A view for teachers, too",
+    copy: "Teachers can review class activity and explore the exercise, assignment, and analytics sections from one dashboard."
+  }
+];
 const state = {
   screen: "welcome",
   role: null,
@@ -418,10 +469,16 @@ function renderPose() {
   const selected = exercises.find((exercise) => exercise.name === state.selectedExercise) || exercises[0];
   const target = selected.duration.split(" ")[0];
   const checks = selected.type === "squat" ? ["Knee Alignment", "Squat Depth", "Body Stability"] : selected.type === "pushup" ? ["Body Alignment", "Elbow Control", "Core Stability"] : ["Arm Extension", "Landing Control", "Movement Rhythm"];
+  const showSampleIssue = guidedTourStep === 2;
+  const poseTracker = showSampleIssue ? `<svg class="pose-tracker-overlay pose-tracker-alert" viewBox="0 0 400 260" aria-hidden="true">
+      <g class="pose-tracker-limb-shadow"><path d="M213 78L211 93L199 144"/><path d="M211 93L169 117L151 145"/><path d="M211 93L246 115L265 141"/><path d="M181 144L217 144"/><path d="M199 144L208 180L143 205"/><path d="M199 144L190 180L265 204"/></g>
+      <g class="pose-tracker-limbs"><path d="M213 78L211 93L199 144"/><path d="M211 93L169 117L151 145"/><path d="M211 93L246 115L265 141"/><path d="M181 144L217 144"/><path d="M199 144L208 180L143 205"/><path d="M199 144L190 180L265 204"/></g>
+      <g class="pose-tracker-joints"><circle cx="211" cy="93" r="3.5"/><circle cx="169" cy="117" r="3"/><circle cx="151" cy="145" r="3"/><circle cx="246" cy="115" r="3"/><circle cx="265" cy="141" r="3"/><circle cx="199" cy="144" r="3.5"/><circle class="tracked-knee" data-tracked-knee="left" cx="208" cy="180" r="4.5"/><circle cx="143" cy="205" r="3"/><circle class="tracked-knee" data-tracked-knee="right" cx="190" cy="180" r="4.5"/><circle cx="265" cy="204" r="3"/></g>
+    </svg><div class="pose-tracker-readout"><div class="pose-tracker-readout-head"><span class="pose-tracker-live-dot"></span><span>POSE ESTIMATION · DEMO</span><small>POSE MAP</small></div><div class="pose-tracker-readout-values"><span>KEYPOINTS <b>10/10</b></span><span>L KNEE <b>0.52, 0.69</b></span><span>R KNEE <b>0.48, 0.69</b></span></div></div>` : "";
   return appView(`<div class="pose-screen"><div class="pose-top"><button data-action="pause-workout" aria-label="Exit workout">×</button><span>${selected.name.toUpperCase()}</span><div class="pose-tag">● POSE DETECTED</div></div>
-    <div class="pose-visual">${illustration(selected.type)}<div class="pose-counter">12<small>/${target}</small></div><div class="pose-status">✳ FORM CHECK ACTIVE</div></div>
-    <div class="timer-box"><div><small>TIME ELAPSED</small><strong>01:18</strong></div><div style="text-align:right"><small>REP QUALITY</small><strong style="color:#66ddb2">98%</strong></div></div>
-    <div class="form-checks">${checks.map((check) => `<div class="form-check"><span>${check}</span><b>✓ GOOD</b></div>`).join("")}</div>
+    <div class="pose-visual">${illustration(selected.type, { hideSkeleton: showSampleIssue })}${poseTracker}<div class="pose-counter">12<small>/${target}</small></div><div class="pose-status">✳ FORM CHECK ACTIVE</div>${showSampleIssue ? `<div class="pose-demo-label">DEMO · SAMPLE FORM FEEDBACK</div>` : ""}</div>
+    <div class="timer-box"><div><small>TIME ELAPSED</small><strong>01:18</strong></div><div style="text-align:right"><small>REP QUALITY</small><strong style="color:${showSampleIssue ? "#ff8585" : "#66ddb2"}">${showSampleIssue ? "73%" : "98%"}</strong></div></div>
+    <div class="form-checks">${checks.map((check, index) => showSampleIssue && index === 0 ? `<div class="form-check needs-attention"><span>${check}</span><b>! CHECK FORM</b></div>` : `<div class="form-check"><span>${check}</span><b>✓ GOOD</b></div>`).join("")}</div>
     <button class="app-button" data-action="show-error">VIEW FORM TIP</button>
   </div>`);
 }
@@ -578,6 +635,10 @@ function openApp(screenName = "welcome", role = null) {
   render();
 }
 function closeApp() {
+  if (guidedTourStep >= 0) {
+    guidedTourStep = -1;
+    document.getElementById("guided-tour").hidden = true;
+  }
   demo.hidden = true;
   site.hidden = false;
   renderRadioMiniPlayer();
@@ -586,6 +647,56 @@ function closeApp() {
   if (window.location.hash === "#app") history.replaceState(null, "", window.location.pathname + window.location.search);
   document.getElementById("home").scrollIntoView({ behavior: "smooth" });
 }
+function renderGuidedTourStep() {
+  const tour = document.getElementById("guided-tour");
+  if (guidedTourStep < 0 || guidedTourStep >= guidedTourSteps.length) return;
+  const step = guidedTourSteps[guidedTourStep];
+  state.selectedExercise = "AI Squats";
+  state.screen = step.screen;
+  state.role = step.role;
+  if (step.role === "teacher") state.teacherTab = "Overview";
+  openApp(step.screen, step.role);
+
+  updateGuidedTourCopy();
+  tour.hidden = false;
+  tour.querySelector("#guided-tour-title").focus({ preventScroll: true });
+}
+function updateGuidedTourCopy() {
+  if (guidedTourStep < 0 || guidedTourStep >= guidedTourSteps.length) return;
+  const tour = document.getElementById("guided-tour");
+  const step = guidedTourSteps[guidedTourStep];
+  tour.querySelector("#guided-tour-step").textContent = translateString(`STEP ${guidedTourStep + 1} OF ${guidedTourSteps.length}`, document.documentElement.lang);
+  tour.querySelector("#guided-tour-title").textContent = translateString(step.title, document.documentElement.lang);
+  tour.querySelector("#guided-tour-copy").textContent = translateString(step.copy, document.documentElement.lang);
+  tour.querySelector(".guided-tour-progress-track i").style.width = `${((guidedTourStep + 1) / guidedTourSteps.length) * 100}%`;
+  tour.querySelector("[data-action='guided-tour-back']").disabled = guidedTourStep === 0;
+  const nextButton = tour.querySelector("[data-action='guided-tour-next']");
+  nextButton.innerHTML = guidedTourStep === guidedTourSteps.length - 1
+    ? `${translateString("Finish tour", document.documentElement.lang)} <span aria-hidden="true">✓</span>`
+    : `${translateString("Next", document.documentElement.lang)} <span aria-hidden="true">→</span>`;
+}
+function startGuidedTour() {
+  guidedTourStep = 0;
+  modalRoot.innerHTML = "";
+  renderGuidedTourStep();
+}
+function endGuidedTour() {
+  if (guidedTourStep < 0) return;
+  guidedTourStep = -1;
+  document.getElementById("guided-tour").hidden = true;
+  closeApp();
+}
+function advanceGuidedTour(direction) {
+  const nextStep = guidedTourStep + direction;
+  if (nextStep < 0) return;
+  if (nextStep >= guidedTourSteps.length) {
+    endGuidedTour();
+    return;
+  }
+  guidedTourStep = nextStep;
+  renderGuidedTourStep();
+}
+document.addEventListener("fitSchoolLanguageChange", updateGuidedTourCopy);
 function navigateTab(tab) {
   state.screen = tab === "home" ? "dashboard" : tab === "teacher" ? "teacher" : tab;
   state.tab = tab;
@@ -601,10 +712,23 @@ function toast(message) {
 }
 
 document.addEventListener("click", (event) => {
+  const launchButton = document.querySelector(".guided-tour-launch");
+  if (!site.hidden && launchButton && event.target instanceof Element && !launchButton.contains(event.target)) {
+    const bounds = launchButton.getBoundingClientRect();
+    if (event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom) {
+      event.preventDefault();
+      startGuidedTour();
+      return;
+    }
+  }
   const activeRadioMenu = radioMiniPlayer.querySelector(".radio-mini-station-menu:not([hidden])");
   if (activeRadioMenu && !radioMiniPlayer.contains(event.target)) closeRadioStationMenu();
   const target = event.target.closest("button, a, [data-action], [data-feature], [data-tab], [data-role], [data-exercise], [data-day], [data-redeem], [data-teacher-tab]");
   if (!target) return;
+  if (target.dataset.action === "guided-tour-start") { startGuidedTour(); return; }
+  if (target.dataset.action === "guided-tour-next") { advanceGuidedTour(1); return; }
+  if (target.dataset.action === "guided-tour-back") { advanceGuidedTour(-1); return; }
+  if (target.dataset.action === "guided-tour-exit") { endGuidedTour(); return; }
   if (target.matches('a[href^="#"]')) {
     const id = target.getAttribute("href").slice(1);
     if (id && !["app"].includes(id)) document.querySelector(".main-nav")?.classList.remove("open");
@@ -725,6 +849,10 @@ function toggleRadioStationMenu(trigger) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && guidedTourStep >= 0) {
+    endGuidedTour();
+    return;
+  }
   const target = event.target instanceof Element ? event.target : null;
   const option = target?.closest("[data-radio-station-option]");
   const trigger = target?.closest("[data-radio-menu-toggle]");
