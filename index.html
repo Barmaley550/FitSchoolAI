@@ -47,6 +47,7 @@
               <a class="button button-primary" href="#about">Discover FitSchool AI <span>↓</span></a>
               <button class="button button-quiet" data-action="open-app"><span class="play-icon">▶</span> Explore the app</button>
             </div>
+            <button type="button" class="guided-tour-launch" data-action="guided-tour-start"><span aria-hidden="true">✦</span><span>Start guided demo</span><span aria-hidden="true">↗</span></button>
             <div class="hero-proof"><div class="avatar-stack"><span>M</span><span>A</span><span>J</span><b>+</b></div><p><strong>Made for every student</strong><br />Movement that meets you where you are.</p></div>
           </div>
           <div class="hero-art">
@@ -139,6 +140,13 @@
         <button type="button" class="zoom-reset" data-zoom-reset>RESET TO 100%</button>
       </div>
     </details>
+    <section id="guided-tour" class="guided-tour" role="region" aria-live="polite" aria-labelledby="guided-tour-title" hidden>
+      <div class="guided-tour-top"><span class="guided-tour-brand">FITSCHOOL AI · GUIDED DEMO</span><button type="button" data-action="guided-tour-exit" aria-label="Exit tour">×</button></div>
+      <div class="guided-tour-progress"><span id="guided-tour-step">STEP 1 OF 8</span><span class="guided-tour-progress-track"><i></i></span></div>
+      <h2 id="guided-tour-title" tabindex="-1"></h2>
+      <p id="guided-tour-copy"></p>
+      <div class="guided-tour-actions"><button type="button" class="guided-tour-back" data-action="guided-tour-back">Back</button><button type="button" class="guided-tour-next" data-action="guided-tour-next">Next <span aria-hidden="true">→</span></button></div>
+    </section>
     <div id="modal-root"></div>
     <div id="language-gate" class="language-gate" role="dialog" aria-modal="true" aria-labelledby="language-gate-title">
       <div class="language-dialog">
