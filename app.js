@@ -176,7 +176,7 @@ const guidedTourSteps = [
     screen: "dashboard",
     role: "student",
     title: "Mark's personal dashboard",
-    copy: "Mark can see his progress and today's suggested workout at a glance. Let's open his AI Squats session."
+    copy: "Mark can see his progress and today's suggested workout at a glance. Let's open his Squats session."
   },
   {
     screen: "pose",
@@ -221,9 +221,10 @@ const state = {
   tab: "home",
   teacherTab: "Overview",
   createdExercises: [],
-  selectedExercise: "AI Squats",
+  selectedExercise: "Squats",
   selectedDay: 0,
   wrappedIndex: 0,
+  wrappedMode: "personal",
   radioStatus: "ready",
   radioError: "",
   radioVolume: 0.25,
@@ -349,18 +350,28 @@ function selectRadioStation(stationId) {
 renderRadioMiniPlayer();
 
 const exercises = [
-  { name: "AI Squats", amount: "30 repetitions", type: "squat", duration: "30 reps" },
-  { name: "AI Push-ups", amount: "20 repetitions", type: "pushup", duration: "20 reps" },
+  { name: "Squats", amount: "30 repetitions", type: "squat", duration: "30 reps" },
+  { name: "Push-ups", amount: "20 repetitions", type: "pushup", duration: "20 reps" },
   { name: "Jumping Jacks", amount: "20 repetitions", type: "jumping-jacks", duration: "20 reps" }
 ];
-const stories = [
-  { kicker: "FITSCHOOL AI PRESENTS", title: "Your Year<br>in Motion", copy: "Every little step added up to something amazing.", number: "2026", symbol: "✦" },
-  { kicker: "YOU SHOWED UP", title: "Workouts<br>Completed", copy: "That's a whole lot of strength in the making.", number: "84", symbol: "↗" },
-  { kicker: "LOOK AT YOU GO", title: "Tasks<br>Finished", copy: "You kept your promises to yourself.", number: "126", symbol: "✓" },
-  { kicker: "YOUR GO-TO MOVE", title: "Favorite<br>Exercise", copy: "Strong legs, stronger confidence.", number: "SQUATS", symbol: "✳" },
-  { kicker: "MOMENTS TO CELEBRATE", title: "Achievements<br>Unlocked", copy: "You earned every single one.", number: "32", symbol: "★" },
-  { kicker: "UNTIL NEXT TIME", title: "See You<br>Next Year!", copy: "Keep moving. Your next chapter is waiting.", number: "♥", symbol: "✦" }
-];
+const wrappedStories = {
+  personal: [
+    { kicker: "FITSCHOOL AI PRESENTS", title: "Your Year<br>in Motion", copy: "Every little step added up to something amazing.", number: "2026", symbol: "✦" },
+    { kicker: "YOU SHOWED UP", title: "Workouts<br>Completed", copy: "That's a whole lot of strength in the making.", number: "84", symbol: "↗", chart: { title: "WORKOUTS BY QUARTER", bars: [["Q1", 16], ["Q2", 19], ["Q3", 23], ["Q4", 26]] } },
+    { kicker: "LOOK AT YOU GO", title: "Tasks<br>Finished", copy: "You kept your promises to yourself.", number: "126", symbol: "✓" },
+    { kicker: "YOUR GO-TO MOVE", title: "Favorite<br>Exercise", copy: "Strong legs, stronger confidence.", number: "SQUATS", symbol: "✳" },
+    { kicker: "MOMENTS TO CELEBRATE", title: "Achievements unlocked", copy: "You earned every single one.", number: "32", symbol: "★" },
+    { kicker: "UNTIL NEXT TIME", title: "See You<br>Next Year!", copy: "Keep moving. Your next chapter is waiting.", number: "♥", symbol: "✦" }
+  ],
+  class: [
+    { kicker: "CLASS 10 B · FITSCHOOL AI", title: "Our Year<br>in Motion", copy: "A year of showing up, moving together, and cheering each other on.", number: "2026", symbol: "✦" },
+    { kicker: "STRONGER TOGETHER", title: "Class Workouts<br>Completed", copy: "Every workout added to the class total.", number: "844", symbol: "↗", chart: { title: "WORKOUTS BY QUARTER", bars: [["Q1", 160], ["Q2", 192], ["Q3", 218], ["Q4", 274]] } },
+    { kicker: "THE WHOLE CLASS", title: "Students<br>Taking Part", copy: "Most of the class joined in and kept moving.", number: "20/24", symbol: "◉", progress: { label: "CLASS PARTICIPATION", value: 83 } },
+    { kicker: "CLASS FAVORITE", title: "Most-Loved<br>Workout", copy: "The move that brought the most energy to class.", number: "SQUATS", symbol: "✳" },
+    { kicker: "A CLASS TO CELEBRATE", title: "Shared Milestones<br>Reached", copy: "Small wins became something to celebrate together.", number: "32", symbol: "★" },
+    { kicker: "UNTIL NEXT TIME", title: "See You<br>Next Year!", copy: "Keep moving together. There are more milestones ahead.", number: "♥", symbol: "✦" }
+  ]
+};
 
 function header({ profile = true } = {}) {
   return `<div class="app-header"><div class="app-brand"><span class="brand-mark"><span></span><span></span><span></span></span><span class="brand-wordmark">FIT<span class="brand-light">SCHOOL</span><small>AI</small></span></div>${profile ? `<button class="app-avatar" data-action="profile" aria-label="Open profile">M</button>` : ""}</div>`;
@@ -420,14 +431,15 @@ function renderDashboard() {
     ${header()}
     <p class="app-hello">MONDAY, OCTOBER 26 · 10 B</p><h1 class="app-title">Hello, ${greetingName}! <span style="color:#eac66d">✦</span></h1><p class="app-subtitle">Ready to move today?</p>
     <div class="balance-card app-card" style="margin-top:14px"><div><small>YOUR FITPOINTS BALANCE</small><strong>1,240 <em>↗ +50 this week</em></strong></div><div class="point-icon">✦</div></div>
-    <div class="app-section-title">YOUR DAILY GOAL <small>VIEW ALL ↗</small></div>
-    <div class="goal-card app-card"><div class="goal-art">${illustration("squat")}</div><span class="app-kicker">TODAY'S TRAINING</span><h3>AI Squats</h3><div class="goal-bottom"><span><strong>0 / 30</strong> repetitions</span><button data-action="start-workout">START →</button></div><div class="progress-track"><span style="width:0%"></span></div></div>
+    <div class="app-section-title">YOUR DAILY GOAL <button class="app-section-action" data-action="workouts">VIEW ALL ↗</button></div>
+    <div class="goal-card app-card"><div class="goal-art">${illustration("squat")}</div><span class="app-kicker">TODAY'S TRAINING</span><h3>Squats</h3><div class="goal-bottom"><span><strong>0 / 30</strong> repetitions</span><button data-action="start-workout">START →</button></div><div class="progress-track"><span style="width:0%"></span></div></div>
     <div class="app-section-title">CLASS RANKING <small>10 B</small></div>
     <div class="ranking-card app-card"><div class="rank-badge">#2</div><div><b>Your class is #2</b><small>You're moving up — keep going!</small></div><span>↗ 1</span></div>
     <div class="app-section-title">YOUR PROGRESS <small>THIS MONTH</small></div>
     <div class="stats-row"><div class="stat-card app-card"><span class="stat-icon">◉</span><strong>84</strong><small>Workouts completed</small></div><div class="stat-card app-card"><span class="stat-icon">⌁</span><strong>14.2h</strong><small>Time in motion</small></div></div>
-    <div class="app-section-title">RECENT ACHIEVEMENTS <small data-action="profile">SEE ALL</small></div>
+    <div class="app-section-title">RECENT ACHIEVEMENTS <button class="app-section-action" data-action="profile">SEE ALL</button></div>
     <div class="achievement-row"><div class="achievement app-card"><span class="achievement-icon">✦</span><div><b>First Workout</b><small>Just getting started</small></div></div><div class="achievement app-card"><span class="achievement-icon">⚡</span><div><b>Consistency</b><small>7-day streak</small></div></div></div>
+    <button class="dashboard-wrapped app-card" data-action="wrapped"><span class="dashboard-wrapped-icon">✦</span><span class="dashboard-wrapped-copy"><b>YOUR YEAR, IN MOTION</b><small>See your personal and class recap</small></span><span class="dashboard-wrapped-arrow">↗</span></button>
   </div>`, { nav: "home" });
 }
 
@@ -457,7 +469,7 @@ function renderWorkouts() {
       <div class="check-grid">${guide.checks.map((check) => `<div class="check-tile app-card"><span>⌁</span><b>${check}</b></div>`).join("")}</div>
     </div><div class="screen-bottom"><button class="app-button" data-action="start-workout">START WORKOUT</button></div>`);
   }
-  return appView(`<div class="app-scroll">${header()}<span class="app-kicker">YOUR PERSONAL TRAINING PLAN</span><h1 class="app-title">AI WORKOUTS.</h1><p class="app-subtitle">Movement made for you. One rep at a time.</p>
+  return appView(`<div class="app-scroll">${header()}<span class="app-kicker">YOUR PERSONAL TRAINING PLAN</span><h1 class="app-title">WORKOUTS.</h1><p class="app-subtitle">Movement made for you. One rep at a time.</p>
     <div class="assignment-banner app-card" style="margin-top:14px"><div><span>TODAY'S TRAINING</span><span>✦ TEACHER ASSIGNED</span></div><h3>3 Exercises</h3><p>Estimated time: 8 min · Move at your own pace.</p></div>
     <div class="app-section-title">YOUR EXERCISES <small>3 TOTAL</small></div>
     <div class="exercise-list">${exercises.map((exercise, index) => `<button class="exercise-card app-card" data-exercise="${exercise.name}"><div class="exercise-thumb">${illustration(exercise.type)}</div><div class="exercise-info"><b>${exercise.name}</b><small>${exercise.amount} · ${index === 0 ? "Form analysis" : "Your own pace"}</small></div><span class="exercise-arrow">›</span></button>`).join("")}</div>
@@ -579,27 +591,34 @@ function renderProfile() {
   </div>`, { nav: state.role === "teacher" ? "home" : "rewards" });
 }
 function renderWrapped() {
+  const stories = wrappedStories[state.wrappedMode];
   const story = stories[state.wrappedIndex];
-  return appView(`<div class="wrapped-view"><div class="wrapped-progress">${stories.map((_, i) => `<i class="${i <= state.wrappedIndex ? "active" : ""}"></i>`).join("")}</div>
-    <div class="wrapped-card"><span class="app-kicker">${story.kicker}</span><div class="wrapped-symbol">${story.symbol}</div><h2>${story.title}</h2><p>${story.copy}</p><div class="wrapped-number">${story.number}</div><span class="app-kicker">FITSCHOOL AI · 2026</span></div>
+  const chartMaximum = story.chart ? Math.max(...story.chart.bars.map((bar) => bar[1])) : 1;
+  const chart = story.chart ? `<div class="wrapped-chart"><span class="wrapped-chart-title">${story.chart.title}</span><div class="wrapped-bars">${story.chart.bars.map(([label, value]) => `<div class="wrapped-bar-item"><b>${value}</b><span class="wrapped-bar"><i style="height:${Math.round(value / chartMaximum * 100)}%"></i></span><small>${label}</small></div>`).join("")}</div></div>` : "";
+  const progress = story.progress ? `<div class="wrapped-participation"><div><span>${story.progress.label}</span><b>${story.progress.value}%</b></div><span class="wrapped-progress-track"><i style="width:${story.progress.value}%"></i></span></div>` : "";
+  return appView(`<div class="wrapped-view">
+    <div class="wrapped-header"><button class="wrapped-back" data-action="dashboard" aria-label="Back to dashboard">← <span>BACK</span></button><span class="wrapped-demo-badge">DEMO DATA · 2026</span></div>
+    <div class="wrapped-mode" role="group" aria-label="Choose recap"><button class="${state.wrappedMode === "personal" ? "active" : ""}" data-wrapped-mode="personal" aria-pressed="${state.wrappedMode === "personal"}">PERSONAL</button><button class="${state.wrappedMode === "class" ? "active" : ""}" data-wrapped-mode="class" aria-pressed="${state.wrappedMode === "class"}">CLASS 10 B</button></div>
+    <div class="wrapped-progress" aria-label="Recap progress">${stories.map((_, i) => `<i class="${i <= state.wrappedIndex ? "active" : ""}"></i>`).join("")}</div>
+    <div class="wrapped-card" data-mode="${state.wrappedMode}"><span class="app-kicker">${story.kicker}</span><div class="wrapped-symbol">${story.symbol}</div><h2>${story.title}</h2><p>${story.copy}</p><div class="wrapped-number">${story.number}</div>${chart}${progress}<span class="wrapped-demo-note">SAMPLE RECAP · DEMO DATA</span></div>
     <div class="wrapped-controls"><button class="app-button secondary" data-action="story-prev" ${state.wrappedIndex === 0 ? "disabled" : ""}>← BACK</button><button class="app-button" data-action="story-next">${state.wrappedIndex === stories.length - 1 ? "FINISH ✦" : "NEXT →"}</button></div>
   </div>`);
 }
 
 function teacherContent() {
   const tab = state.teacherTab;
-  if (tab === "Exercises") return `<div class="app-section-title">YOUR EXERCISES <small>${3 + state.createdExercises.length} TOTAL</small></div>${[["AI Squats", "squat", "30 reps · Medium"], ["AI Push-ups", "pushup", "20 reps · Medium"], ["Jumping Jacks", "jumping-jacks", "20 reps · Easy"]].map(([item, type, detail]) => `<div class="exercise-card app-card" style="margin-bottom:7px"><div class="exercise-thumb">${illustration(type)}</div><div class="exercise-info"><b>${item}</b><small>${detail}</small></div><span class="exercise-arrow">···</span></div>`).join("")}${state.createdExercises.map((exercise) => `<div class="exercise-card app-card" style="margin-bottom:7px"><div class="exercise-thumb">${illustration("squat")}</div><div class="exercise-info"><b>${escapeHtml(exercise.name)}</b><small>${exercise.reps} reps · ${escapeHtml(exercise.difficulty)} · Published</small>${exercise.description ? `<small>${escapeHtml(exercise.description)}</small>` : ""}</div><span class="exercise-arrow">✓</span></div>`).join("")}<button class="app-button" data-teacher-tab="Create Exercise">+ CREATE EXERCISE</button>`;
+  if (tab === "Exercises") return `<div class="app-section-title">YOUR EXERCISES <small>${3 + state.createdExercises.length} TOTAL</small></div>${[["Squats", "squat", "30 reps · Medium"], ["Push-ups", "pushup", "20 reps · Medium"], ["Jumping Jacks", "jumping-jacks", "20 reps · Easy"]].map(([item, type, detail]) => `<div class="exercise-card app-card" style="margin-bottom:7px"><div class="exercise-thumb">${illustration(type)}</div><div class="exercise-info"><b>${item}</b><small>${detail}</small></div><span class="exercise-arrow">···</span></div>`).join("")}${state.createdExercises.map((exercise) => `<div class="exercise-card app-card" style="margin-bottom:7px"><div class="exercise-thumb">${illustration("squat")}</div><div class="exercise-info"><b>${escapeHtml(exercise.name)}</b><small>${exercise.reps} reps · ${escapeHtml(exercise.difficulty)} · Published</small>${exercise.description ? `<small>${escapeHtml(exercise.description)}</small>` : ""}</div><span class="exercise-arrow">✓</span></div>`).join("")}<button class="app-button" data-teacher-tab="Create Exercise">+ CREATE EXERCISE</button>`;
   if (tab === "Create Exercise") return `<div class="app-section-title">CREATE EXERCISE <small>NEW ACTIVITY</small></div><form data-form="exercise"><label class="field-label">EXERCISE NAME</label><input class="app-input" name="name" placeholder="e.g. Standing lunges" required><label class="field-label">DESCRIPTION</label><textarea class="app-input" name="description" rows="2" placeholder="Add a few helpful instructions"></textarea><label class="field-label">TARGET REPETITIONS</label><input class="app-input" name="reps" type="number" min="1" placeholder="e.g. 20" required><label class="field-label">DIFFICULTY</label><select class="app-input" name="difficulty"><option>Easy</option><option selected>Medium</option><option>Challenging</option></select><div class="exercise-reference">${illustration("squat")}</div><button class="app-button" type="submit">PUBLISH TO CLASS</button></form>`;
-  if (tab === "Assignments") return `<div class="app-section-title">ACTIVE ASSIGNMENTS <small>2 ACTIVE</small></div><div class="assignment-row app-card"><div><b>Today's Training</b><span>● ACTIVE</span></div><p>AI Squats · Push-ups · Jumping Jacks</p><div class="teacher-progress"><i style="width:68%"></i></div><p style="margin-top:6px">16 of 24 students completed</p></div><div class="assignment-row app-card"><div><b>Weekly Movement Challenge</b><span>● ACTIVE</span></div><p>Complete 3 workouts this week</p><div class="teacher-progress"><i style="width:42%"></i></div><p style="margin-top:6px">10 of 24 students completed</p></div><button class="app-button" data-teacher-tab="Create Exercise">+ CREATE ASSIGNMENT</button>`;
+  if (tab === "Assignments") return `<div class="app-section-title">ACTIVE ASSIGNMENTS <small>2 ACTIVE</small></div><div class="assignment-row app-card"><div><b>Today's Training</b><span>● ACTIVE</span></div><p>Squats · Push-ups · Jumping Jacks</p><div class="teacher-progress"><i style="width:68%"></i></div><p style="margin-top:6px">16 of 24 students completed</p></div><div class="assignment-row app-card"><div><b>Weekly Movement Challenge</b><span>● ACTIVE</span></div><p>Complete 3 workouts this week</p><div class="teacher-progress"><i style="width:42%"></i></div><p style="margin-top:6px">10 of 24 students completed</p></div><button class="app-button" data-teacher-tab="Create Exercise">+ CREATE ASSIGNMENT</button>`;
   if (tab === "Analytics") return `<div class="app-section-title">CLASS ANALYTICS <small>THIS MONTH</small></div><div class="teacher-stat-row"><div class="teacher-stat app-card"><b>86%</b><small>Class participation</small></div><div class="teacher-stat app-card"><b>+18%</b><small>Active minutes</small></div></div><div class="app-section-title">WEEKLY ACTIVITY</div><div class="app-card" style="height:135px;padding:15px;display:flex;align-items:end;justify-content:space-around">${[48,73,55,90,68,82,61].map((n, i) => `<div style="height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:6px"><span style="width:18px;height:${n}%;border-radius:5px 5px 2px 2px;background:${i === 3 ? "#ab8aff" : "#6e55a4"}"></span><small style="font-size:6px;color:#8992a1">${["M","T","W","T","F","S","S"][i]}</small></div>`).join("")}</div><div class="app-section-title">CLASS ENGAGEMENT</div><div class="student-row app-card"><div><b>Students active this week</b><small>20 of 24 students</small></div><span>83%</span></div>`;
   const students = [["MJ", "Mark Johnson", "12 workouts", "92%"], ["AL", "Anna Lee", "10 workouts", "84%"], ["DP", "David Park", "9 workouts", "78%"]];
   return `<div class="app-section-title">${tab === "My Classes" ? "MY CLASSES" : "CLASS PROGRESS"} <small>10 B · 24 STUDENTS</small></div>${tab === "My Classes" ? `<div class="app-card" style="padding:13px;margin-bottom:12px"><span class="app-kicker">CLASS 10 B</span><h3 style="margin:8px 0 4px;font:700 14px var(--display)">Grade 10 · Room 204</h3><p class="app-subtitle">24 students · Physical Education</p><div class="teacher-progress"><i style="width:83%"></i></div></div>` : `<div class="teacher-stat-row"><div class="teacher-stat app-card"><b>16 / 24</b><small>Active assignments</small></div><div class="teacher-stat app-card"><b>84</b><small>Completed workouts</small></div></div>`}
-    <div class="app-section-title">STUDENT PROGRESS <small>VIEW CLASS →</small></div>${students.map(([initials, name, workouts, percent]) => `<div class="student-row app-card"><div class="student-mini-avatar">${initials}</div><div><b>${name}</b><small>${workouts}</small></div><span>${percent}</span></div>`).join("")}
+    <div class="app-section-title">STUDENT PROGRESS <button class="app-section-action" data-teacher-tab="My Classes">VIEW CLASS →</button></div>${students.map(([initials, name, workouts, percent]) => `<div class="student-row app-card"><div class="student-mini-avatar">${initials}</div><div><b>${name}</b><small>${workouts}</small></div><span>${percent}</span></div>`).join("")}
     <div class="app-section-title">QUICK ACTION</div><button class="app-button" data-teacher-tab="Create Exercise">+ CREATE EXERCISE</button>`;
 }
 function renderTeacher() {
   const tabs = ["Overview", "My Classes", "Exercises", "Assignments", "Analytics"];
-  return appView(`<div class="app-scroll">${header()}<span class="app-kicker">YOUR SCHOOL · SCHOOL №40</span><h1 class="app-title">TEACHER<br>DASHBOARD.</h1><p class="app-subtitle">Welcome back, Ms. Carter.</p>
+  return appView(`<div class="app-scroll">${header()}<span class="app-kicker">YOUR SCHOOL · SCHOOL №40</span><h1 class="app-title">TEACHER'S<br>DASHBOARD.</h1><p class="app-subtitle">Welcome back, Ms. Carter.</p>
     <div class="teacher-tabs">${tabs.map((tab) => `<button class="${state.teacherTab === tab ? "active" : ""}" data-teacher-tab="${tab}">${tab}</button>`).join("")}</div>
     ${teacherContent()}
   </div>`, { nav: "teacher" });
@@ -651,7 +670,7 @@ function renderGuidedTourStep() {
   const tour = document.getElementById("guided-tour");
   if (guidedTourStep < 0 || guidedTourStep >= guidedTourSteps.length) return;
   const step = guidedTourSteps[guidedTourStep];
-  state.selectedExercise = "AI Squats";
+  state.selectedExercise = "Squats";
   state.screen = step.screen;
   state.role = step.role;
   if (step.role === "teacher") state.teacherTab = "Overview";
@@ -700,7 +719,7 @@ document.addEventListener("fitSchoolLanguageChange", updateGuidedTourCopy);
 function navigateTab(tab) {
   state.screen = tab === "home" ? "dashboard" : tab === "teacher" ? "teacher" : tab;
   state.tab = tab;
-  state.selectedExercise = "AI Squats";
+  state.selectedExercise = "Squats";
   if (tab === "teacher") state.teacherTab = "Overview";
   render();
 }
@@ -723,7 +742,7 @@ document.addEventListener("click", (event) => {
   }
   const activeRadioMenu = radioMiniPlayer.querySelector(".radio-mini-station-menu:not([hidden])");
   if (activeRadioMenu && !radioMiniPlayer.contains(event.target)) closeRadioStationMenu();
-  const target = event.target.closest("button, a, [data-action], [data-feature], [data-tab], [data-role], [data-exercise], [data-day], [data-redeem], [data-teacher-tab]");
+  const target = event.target.closest("button, a, [data-action], [data-feature], [data-tab], [data-role], [data-exercise], [data-day], [data-redeem], [data-teacher-tab], [data-wrapped-mode]");
   if (!target) return;
   if (target.dataset.action === "guided-tour-start") { startGuidedTour(); return; }
   if (target.dataset.action === "guided-tour-next") { advanceGuidedTour(1); return; }
@@ -741,7 +760,10 @@ document.addEventListener("click", (event) => {
     const role = roles[key] || "student";
     openApp(screens[key] || "dashboard", role);
     if (key === "teacher") state.teacherTab = "Overview";
-    if (key === "wrapped") state.wrappedIndex = 0;
+    if (key === "wrapped") {
+      state.wrappedIndex = 0;
+      state.wrappedMode = "personal";
+    }
     render();
     return;
   }
@@ -766,6 +788,12 @@ document.addEventListener("click", (event) => {
     return;
   }
   if (target.dataset.teacherTab) { state.teacherTab = target.dataset.teacherTab; render(); return; }
+  if (target.dataset.wrappedMode) {
+    state.wrappedMode = target.dataset.wrappedMode;
+    state.wrappedIndex = 0;
+    render();
+    return;
+  }
   const action = target.dataset.action;
   if (!action) return;
   switch (action) {
@@ -781,7 +809,12 @@ document.addEventListener("click", (event) => {
     case "switch-role": state.role = null; state.screen = "welcome"; render(); break;
     case "profile": state.screen = "profile"; render(); break;
     case "teacher": state.screen = "teacher"; state.teacherTab = "Overview"; render(); break;
-    case "wrapped": state.screen = "wrapped"; state.wrappedIndex = 0; render(); break;
+    case "wrapped":
+      state.screen = "wrapped";
+      state.wrappedIndex = 0;
+      state.wrappedMode = "personal";
+      render();
+      break;
     case "workouts": state.screen = "workouts"; render(); break;
     case "dashboard": state.screen = "dashboard"; render(); break;
     case "back": state.screen = "workouts"; render(); break;
@@ -819,8 +852,8 @@ document.addEventListener("click", (event) => {
       break;
     case "story-prev": state.wrappedIndex = Math.max(0, state.wrappedIndex - 1); render(); break;
     case "story-next":
-      if (state.wrappedIndex < stories.length - 1) { state.wrappedIndex += 1; render(); }
-      else { state.screen = "profile"; render(); }
+      if (state.wrappedIndex < wrappedStories[state.wrappedMode].length - 1) { state.wrappedIndex += 1; render(); }
+      else { state.screen = "dashboard"; render(); }
       break;
     case "close-modal": modalRoot.innerHTML = ""; break;
     case "modal-backdrop": if (event.target === target) modalRoot.innerHTML = ""; break;
